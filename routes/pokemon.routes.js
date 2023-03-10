@@ -13,8 +13,8 @@ module.exports = function (app) {
     "/api/v1/images/pokemons",
     controller.getPokemonImageByNameType
   );
-  // app.get(
-  //   "/api/orders/user-access/:id",
-  //   controller.getOrderUserAccess
-  // );
+  app.get(
+    "api/v1/images/pokemon/:pokemon/status",
+    controller.getPokemonStatus
+  );
 }

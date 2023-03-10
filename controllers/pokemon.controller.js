@@ -20,7 +20,7 @@ const downloadPokemonImage = (url, filepath) => {
   })
 };
 
-function getPokemonInfo(name, imageType) {
+function getPokemonInfo(name) {
   return new Promise((resolve, reject) => {
     try {
       let urlBase = 'https://pokeapi.co/api/v2/pokemon/';
@@ -31,7 +31,7 @@ function getPokemonInfo(name, imageType) {
           data += d;
         })
         res.on('end', () => {
-          resolve(data,statusCode)
+          resolve({data,statusCode})
         })
       })
     } catch (err) {
@@ -53,12 +53,12 @@ const getPokemonImageByNameType = async (req, res) => {
 
   if (!fs.existsSync(filePath)) {
     console.log("From the POKEAPI Downloading")
-    getPokemonInfo(name, imageType)
-      .then((pokemonInfo,statusCode) => {
-        if (statusCode !== 200) {
+    getPokemonInfo(name)
+      .then((infoReq) => {
+        if (infoReq.statusCode !== 200) {
           return res.status(404).send('Pokemon not found');
         }
-        const urlImage = JSON.parse(pokemonInfo).sprites[imageType]
+        const urlImage = JSON.parse(infoReq.data).sprites[imageType]
         downloadPokemonImage(urlImage, filePath)
           .then(() => {
             fs.readFile(filePath, (err, data) => {
@@ -87,7 +87,18 @@ const getPokemonImageByNameType = async (req, res) => {
   }
 
 }
-
+const getPokemonStatus = async (req, res) => {
+  console.log('ARRRRRIBE')
+  const name = req.params.pokemon
+  const filePath1 = `./images/${name}_front_default.png`;
+  const filePath2 = `./images/${name}_front_shiny.png`;
+  if (!fs.existsSync(filePath1) || !fs.existsSync(filePath2)) {
+    res.send({ status: 'cache' })
+  } else {
+    res.send({ status: 'unknow' })
+  }
+}
 module.exports = {
-  getPokemonImageByNameType
+  getPokemonImageByNameType,
+  getPokemonStatus
 }
